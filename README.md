@@ -9,7 +9,7 @@ Want to download a video and get the transcription for it? This is 100% offline,
 git clone https://github.com/niklasmh/video-to-text.git
 
 # Install dependencies
-pip install librosa torch torchaudio tqdm transformers
+pip install librosa rich torch torchaudio transformers
 
 # Transcribe your-video.mp4
 python main.py your-video.mp4 --model NbAiLab/nb-whisper-medium

@@ -1,9 +1,22 @@
-import os
-import torch
-import librosa
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from argparse import ArgumentParser
-from tqdm import tqdm
+import os
+import librosa
+from rich.console import Console
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+import torch
+from transformers import WhisperProcessor, WhisperForConditionalGeneration
+
+console = Console()
+
+def spinner_task(description):
+    with Progress(
+        SpinnerColumn(),
+        TextColumn(f"[bold]{description}"),
+        transient=True,
+        console=console,
+    ) as progress:
+        task = progress.add_task(description, total=None)
+        return task, progress
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -19,68 +32,75 @@ if __name__ == "__main__":
     FILENAME = args.name if args.name else ".".join(VIDEO_FILE.split(".")[:-1])
     AUDIO_FILE = FILENAME + ".mp3"
 
-    print(f"Converting {VIDEO_FILE} to {AUDIO_FILE}...")
-    os.system(f"ffmpeg -y -hide_banner -loglevel error -i {VIDEO_FILE} {AUDIO_FILE}")
-    print(f"Done!")
+    with Progress(SpinnerColumn(), TextColumn(" [bold green]Converting video to audio..."), transient=True, console=console) as progress:
+        task = progress.add_task("convert", total=None)
+        os.system(f"ffmpeg -y -hide_banner -loglevel error -i {VIDEO_FILE} {AUDIO_FILE}")
+    console.print(":white_check_mark: [green]Audio conversion done![/green]")
 
-    # Load model + processor
-    print(f"Loading model and processor...")
-    model_id = args.model
-    processor = WhisperProcessor.from_pretrained(model_id)
-    model = WhisperForConditionalGeneration.from_pretrained(model_id)
+    with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading model and processor..."), transient=True, console=console) as progress:
+        task = progress.add_task("load_model", total=None)
+        model_id = args.model
+        processor = WhisperProcessor.from_pretrained(model_id)
+        model = WhisperForConditionalGeneration.from_pretrained(model_id)
+    console.print(":white_check_mark: [green]Model and processor loaded![/green]")
 
-    # Load audio (mono, 16kHz)
-    print(f"Loading audio from {AUDIO_FILE}...")
-    audio, sr = librosa.load(AUDIO_FILE, sr=16000)
+    with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading audio file..."), transient=True, console=console) as progress:
+        task = progress.add_task("load_audio", total=None)
+        audio, sr = librosa.load(AUDIO_FILE, sr=16000)
+    console.print(":white_check_mark: [green]Audio loaded![/green]")
 
-    # Whisper input window is ~30s → 30 * 16000 = 480000 samples
     max_length = 30 * sr
-
     transcriptions = []
 
     with open(f"transcription.{FILENAME}.txt", "w") as f:
         f.write("")
 
-    print()
-    print()
+    console.print(f":hourglass_flowing_sand: [bold yellow]Starting transcription...[/bold yellow] This may take a while depending on the audio length and model size.")
 
-    # Split into 30s chunks
-    print(f"Starting transcription...")
-    for start in tqdm(range(0, len(audio), max_length)):
-        chunk = audio[start:start+max_length]
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+        TimeElapsedColumn(),
+        console=console,
+        transient=True,
+    ) as progress:
+        task = progress.add_task("[cyan]Transcribing audio...", total=len(audio)//max_length+1)
+        for start in range(0, len(audio), max_length):
+            chunk = audio[start:start+max_length]
 
-        # Skip empty chunks
-        if len(chunk) == 0:
-            continue
+            if len(chunk) == 0:
+                progress.advance(task)
+                continue
 
-        # Preprocess
-        inputs = processor(
-            torch.tensor(chunk),
-            sampling_rate=sr,
-            return_tensors="pt"
-        )
-
-        # Get decoder prompt (Norwegian, transcribe)
-        forced_decoder_ids = processor.get_decoder_prompt_ids(
-            task="transcribe",
-            language="no"
-        )
-
-        # Run inference
-        with torch.no_grad():
-            predicted_ids = model.generate(
-                inputs["input_features"],
-                forced_decoder_ids=forced_decoder_ids
+            inputs = processor(
+                torch.tensor(chunk),
+                sampling_rate=sr,
+                return_tensors="pt"
             )
 
-        # Decode
-        text = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
-        transcriptions.append(text)
+            forced_decoder_ids = processor.get_decoder_prompt_ids(
+                task="transcribe",
+                language="no"
+            )
 
-        with open(f"transcription.{FILENAME}.txt", "a") as f:
-            f.write(text.strip() + "\n\n")
+            with torch.no_grad():
+                predicted_ids = model.generate(
+                    inputs["input_features"],
+                    forced_decoder_ids=forced_decoder_ids
+                )
 
-    print(f"Transcription complete! You can find the results in transcription.{FILENAME}.txt")
+            text = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
+            transcriptions.append(text)
+
+            with open(f"transcription.{FILENAME}.txt", "a") as f:
+                f.write(text.strip() + "\n\n")
+
+            progress.advance(task)
+
+    console.print(":white_check_mark: [bold green]Transcription complete![/bold green]")
+    console.print(f"You can find the results in [yellow]transcription.{FILENAME}.txt[/yellow]")
 
     with open(f"transcription-full.{FILENAME}.txt", "w") as f:
         f.write("".join(transcriptions))
