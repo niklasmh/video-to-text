@@ -7,17 +7,27 @@ DISCLAIMER: I have only tested with the [`NbAiLab/nb-whisper-base`](https://hugg
 ## How to use
 
 ```bash
+# Download repo
+git clone https://github.com/niklasmh/video-to-text.git
+
+# Install dependencies
 pip install librosa torch torchaudio tqdm transformers
 
-python main.py my-video.mp4 # -> transcription.my-video.txt
+# Transcribe your-video.mp4
+python main.py your-video.mp4 --model NbAiLab/nb-whisper-medium
+# -> Output: transcription.your-video.txt
+```
 
-# usage: main.py [-h] [-m MODEL] file [name]
-#
-# positional arguments:
-#   file               Path to the video file
-#   name               Optional output name. Using input filename by default.
-#
-# options:
-#   -h, --help         show this help message and exit
-#   -m, --model MODEL  Hugging Face model name. Using a norwegian model by default.
+## CLI
+
+```
+usage: main.py [-h] [-m MODEL] file [name]
+
+positional arguments:
+  file               Path to the video file
+  name               Optional output name. Using input filename by default.
+
+options:
+  -h, --help         show this help message and exit
+  -m, --model MODEL  Hugging Face model name. Using a norwegian model by default.
 ```
