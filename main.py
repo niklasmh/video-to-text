@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument("file", type=str, help="Path to the video file")
     parser.add_argument("name", type=str, nargs="?", help="Optional output name. Using input filename by default.")
     parser.add_argument("-m", "--model", type=str, default="openai/whisper-large-v3", help="Hugging Face model name. Using `openai/whisper-large-v3` by default.")
+    parser.add_argument("-l", "--language", type=str, default="en", help="Language code for transcription. Using `en` by default.")
     args = parser.parse_args()
 
     VIDEO_FILE = args.file
@@ -79,16 +80,11 @@ if __name__ == "__main__":
                 sampling_rate=sr,
                 return_tensors="pt"
             )
-
-            forced_decoder_ids = processor.get_decoder_prompt_ids(
-                task="transcribe",
-                language="no"
-            )
-
             with torch.no_grad():
                 predicted_ids = model.generate(
                     inputs["input_features"],
-                    forced_decoder_ids=forced_decoder_ids
+                    task="transcribe",
+                    language=args.language,
                 )
 
             text = processor.batch_decode(predicted_ids, skip_special_tokens=True)[0]
