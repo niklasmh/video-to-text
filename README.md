@@ -27,7 +27,7 @@ positional arguments:
 
 options:
   -h, --help         show this help message and exit
-  -m, --model MODEL  Hugging Face model name. Using a norwegian model by default.
+  -m, --model MODEL  Hugging Face model name. Using `openai/whisper-large-v3` by default.
 ```
 
-_DISCLAIMER: I have only tested with the [`NbAiLab/nb-whisper-base`](https://huggingface.co/NbAiLab/nb-whisper-base) models so far. There are probably models that does not work. But the code is easy to fix with some vibe coding._
+_DISCLAIMER: I have only tested with the [`openai/whisper-large-v3`](https://huggingface.co/openai/whisper-large-v3) and [`NbAiLab/nb-whisper-base`](https://huggingface.co/NbAiLab/nb-whisper-base) models so far. There are probably models that does not work. But the code should be easy to fix with some vibe coding._

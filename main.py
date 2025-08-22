@@ -9,7 +9,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("file", type=str, help="Path to the video file")
     parser.add_argument("name", type=str, nargs="?", help="Optional output name. Using input filename by default.")
-    parser.add_argument("-m", "--model", type=str, default="NbAiLabBeta/nb-whisper-medium", help="Hugging Face model name. Using a norwegian model by default.")
+    parser.add_argument("-m", "--model", type=str, default="openai/whisper-large-v3", help="Hugging Face model name. Using `openai/whisper-large-v3` by default.")
     args = parser.parse_args()
 
     VIDEO_FILE = args.file
