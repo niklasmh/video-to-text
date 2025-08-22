@@ -30,4 +30,4 @@ options:
   -m, --model MODEL  Hugging Face model name. Using a norwegian model by default.
 ```
 
-DISCLAIMER: I have only tested with the [`NbAiLab/nb-whisper-base`](https://huggingface.co/NbAiLab/nb-whisper-base) models so far. There are probably models that does not work. But the code is easy to fix with some vibe coding.
+_DISCLAIMER: I have only tested with the [`NbAiLab/nb-whisper-base`](https://huggingface.co/NbAiLab/nb-whisper-base) models so far. There are probably models that does not work. But the code is easy to fix with some vibe coding._
