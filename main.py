@@ -56,7 +56,7 @@ if __name__ == "__main__":
     with open(f"transcription.{FILENAME}.txt", "w") as f:
         f.write("")
 
-    console.print(f":hourglass_flowing_sand: [bold yellow]Starting transcription...[/bold yellow] This may take a while depending on the audio length and model size.")
+    console.print(f":hourglass_flowing_sand: [bold green]Starting transcription...[/bold green] This may take a while depending on the audio length and model size.")
 
     with Progress(
         SpinnerColumn(),
@@ -78,11 +78,13 @@ if __name__ == "__main__":
             inputs = processor(
                 torch.tensor(chunk),
                 sampling_rate=sr,
-                return_tensors="pt"
+                return_tensors="pt",
+                return_attention_mask=True,
             )
             with torch.no_grad():
                 predicted_ids = model.generate(
                     inputs["input_features"],
+                    attention_mask=inputs["attention_mask"],
                     task="transcribe",
                     language=args.language,
                 )
