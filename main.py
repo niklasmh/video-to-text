@@ -15,6 +15,8 @@ def spinner_task(description):
         task = progress.add_task(description, total=None)
         return task, progress
 
+supported_languages = ['en', 'zh', 'de', 'es', 'ru', 'ko', 'fr', 'ja', 'pt', 'tr', 'pl', 'ca', 'nl', 'ar', 'sv', 'it', 'id', 'hi', 'fi', 'vi', 'he', 'uk', 'el', 'ms', 'cs', 'ro', 'da', 'hu', 'ta', 'no', 'th', 'ur', 'hr', 'bg', 'lt', 'la', 'mi', 'ml', 'cy', 'sk', 'te', 'fa', 'lv', 'bn', 'sr', 'az', 'sl', 'kn', 'et', 'mk', 'br', 'eu', 'is', 'hy', 'ne', 'mn', 'bs', 'kk', 'sq', 'sw', 'gl', 'mr', 'pa', 'si', 'km', 'sn', 'yo', 'so', 'af', 'oc', 'ka', 'be', 'tg', 'sd', 'gu', 'am', 'yi', 'lo', 'uz', 'fo', 'ht', 'ps', 'tk', 'nn', 'mt', 'sa', 'lb', 'my', 'bo', 'tl', 'mg', 'as', 'tt', 'haw', 'ln', 'ha', 'ba', 'jw', 'su', 'yue', 'my', 'ca', 'nl', 'ht', 'lb', 'ps', 'pa', 'ro', 'ro', 'si', 'es', 'zh']
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument("file", type=str, help="Path to the video file")
@@ -22,6 +24,10 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--model", type=str, default="openai/whisper-large-v3", help="Hugging Face model name. Using `openai/whisper-large-v3` by default.")
     parser.add_argument("-l", "--language", type=str, default="en", help="Language code for transcription. Using `en` by default.")
     args = parser.parse_args()
+
+    if args.language not in supported_languages:
+        console.print(f"Unsupported language: {args.language}. Supported languages are: {supported_languages}")
+        raise SystemExit(1)
 
     VIDEO_FILE = args.file
     if not os.path.exists(VIDEO_FILE):
@@ -36,14 +42,14 @@ if __name__ == "__main__":
     console.print(":white_check_mark: [green]Audio conversion done![/green]")
 
 
-    with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading model and processor..."), transient=True, console=console) as progress:
+    with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading ASR model..."), transient=True, console=console) as progress:
         import torch
         from transformers import WhisperProcessor, WhisperForConditionalGeneration
         task = progress.add_task("load_model", total=None)
         model_id = args.model
         processor = WhisperProcessor.from_pretrained(model_id)
         model = WhisperForConditionalGeneration.from_pretrained(model_id)
-    console.print(":white_check_mark: [green]Model and processor loaded![/green]")
+    console.print(":white_check_mark: [green]ASR model loaded![/green]")
 
     with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading audio file..."), transient=True, console=console) as progress:
         import librosa

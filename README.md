@@ -19,15 +19,17 @@ python main.py your-video.mp4 --model NbAiLab/nb-whisper-medium
 ## CLI
 
 ```
-usage: main.py [-h] [-m MODEL] file [name]
+usage: main.py [-h] [-m MODEL] [-l LANGUAGE] file [name]
 
 positional arguments:
-  file               Path to the video file
-  name               Optional output name. Using input filename by default.
+  file                  Path to the video file
+  name                  Optional output name. Using input filename by default.
 
 options:
-  -h, --help         show this help message and exit
-  -m, --model MODEL  Hugging Face model name. Using `openai/whisper-large-v3` by default.
+  -h, --help            show this help message and exit
+  -m, --model MODEL     Hugging Face model name. Using `openai/whisper-large-v3` by default.
+  -l, --language LANGUAGE
+                        Language code for transcription. Using `en` by default.
 ```
 
 _DISCLAIMER: I have only tested with the [`openai/whisper-large-v3`](https://huggingface.co/openai/whisper-large-v3) and [`NbAiLab/nb-whisper-base`](https://huggingface.co/NbAiLab/nb-whisper-base) models so far. There are probably models that does not work. But the code should be easy to fix with some vibe coding._
