@@ -1,10 +1,7 @@
 from argparse import ArgumentParser
 import os
-import librosa
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-import torch
-from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 console = Console()
 
@@ -38,7 +35,10 @@ if __name__ == "__main__":
         os.system(f"ffmpeg -y -hide_banner -loglevel error -i {VIDEO_FILE} {AUDIO_FILE}")
     console.print(":white_check_mark: [green]Audio conversion done![/green]")
 
+
     with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading model and processor..."), transient=True, console=console) as progress:
+        import torch
+        from transformers import WhisperProcessor, WhisperForConditionalGeneration
         task = progress.add_task("load_model", total=None)
         model_id = args.model
         processor = WhisperProcessor.from_pretrained(model_id)
@@ -46,6 +46,7 @@ if __name__ == "__main__":
     console.print(":white_check_mark: [green]Model and processor loaded![/green]")
 
     with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading audio file..."), transient=True, console=console) as progress:
+        import librosa
         task = progress.add_task("load_audio", total=None)
         audio, sr = librosa.load(AUDIO_FILE, sr=16000)
     console.print(":white_check_mark: [green]Audio loaded![/green]")
