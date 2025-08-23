@@ -41,7 +41,6 @@ if __name__ == "__main__":
         os.system(f"ffmpeg -y -hide_banner -loglevel error -i {VIDEO_FILE} {AUDIO_FILE}")
     console.print(":white_check_mark: [green]Audio conversion done![/green]")
 
-
     with Progress(SpinnerColumn(), TextColumn(" [bold green]Loading ASR model..."), transient=True, console=console) as progress:
         import torch
         from transformers import WhisperProcessor, WhisperForConditionalGeneration
